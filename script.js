@@ -97,8 +97,16 @@ document.addEventListener('DOMContentLoaded', () => {
 // Contact form handling
 const contactForm = document.querySelector('.contact-form form');
 
+// Enhanced contact form for Netlify
 if (contactForm) {
     contactForm.addEventListener('submit', (e) => {
+        // Check if we're on Netlify (form will be handled by Netlify)
+        if (contactForm.hasAttribute('data-netlify')) {
+            // Let Netlify handle the form submission
+            return;
+        }
+        
+        // Fallback for local development
         e.preventDefault();
         
         // Get form data
@@ -110,18 +118,18 @@ if (contactForm) {
         
         // Simple form validation
         if (!name || !email || !message) {
-            alert('Bitte füllen Sie alle erforderlichen Felder aus.');
+            showFormMessage('Bitte füllen Sie alle erforderlichen Felder aus.', 'error');
             return;
         }
         
         // Email validation
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
-            alert('Bitte geben Sie eine gültige E-Mail-Adresse ein.');
+            showFormMessage('Bitte geben Sie eine gültige E-Mail-Adresse ein.', 'error');
             return;
         }
         
-        // Simulate form submission
+        // Simulate form submission for local development
         const submitButton = contactForm.querySelector('.btn-primary');
         const originalText = submitButton.textContent;
         
@@ -130,12 +138,43 @@ if (contactForm) {
         
         // Simulate API call
         setTimeout(() => {
-            alert('Vielen Dank für Ihre Nachricht! Ich werde mich bald bei Ihnen melden.');
+            showFormMessage('Vielen Dank für Ihre Nachricht! Ich werde mich bald bei Ihnen melden.', 'success');
             contactForm.reset();
             submitButton.textContent = originalText;
             submitButton.disabled = false;
         }, 2000);
     });
+}
+
+// Enhanced form message display
+function showFormMessage(message, type) {
+    // Remove existing message
+    const existingMessage = document.querySelector('.form-message');
+    if (existingMessage) {
+        existingMessage.remove();
+    }
+    
+    // Create new message
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `form-message ${type}`;
+    messageDiv.textContent = message;
+    messageDiv.style.cssText = `
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        font-weight: 500;
+        background: ${type === 'success' ? '#d4edda' : '#f8d7da'};
+        color: ${type === 'success' ? '#155724' : '#721c24'};
+        border: 1px solid ${type === 'success' ? '#c3e6cb' : '#f5c6cb'};
+    `;
+    
+    // Insert message at the top of the form
+    contactForm.insertBefore(messageDiv, contactForm.firstChild);
+    
+    // Remove message after 5 seconds
+    setTimeout(() => {
+        messageDiv.remove();
+    }, 5000);
 }
 
 // Typing animation for hero title
